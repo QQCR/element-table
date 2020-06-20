@@ -1,37 +1,29 @@
 <template>
   <div>
-
     <table-page
-      rowKey="id"
       :list="list"
-      :total="total"
       :table_title="table_title"
       :operates="operates"
-      :pageObj="pageObj"
-      :show_pagination="show_pagination"
-      @onPageChange="pageChange"
-      @onSizeChange="sizeChange"
-      @editChange="editChange"
     >
       <template v-slot:tags="scope">
-        <el-tag
-          v-if="scope.scope.row.tag == 1"
-          size="small"
-          type="primary"
-          >tag1
-        </el-tag>
-        <el-tag
-          v-else-if="scope.scope.row.tag == 2"
-          size="small"
-          type="warning"
-          >tag2
-        </el-tag>
-        <el-tag
-          v-else-if="scope.scope.row.tag == 3"
-          size="small"
-          type="success"
-          >tag3
-        </el-tag>
+          <el-tag
+            v-if="scope.scope.tag == 1"
+            size="small"
+            type="primary"
+            >tag1
+          </el-tag>
+          <el-tag
+            v-else-if="scope.scope.tag == 2"
+            size="small"
+            type="warning"
+            >tag2
+          </el-tag>
+          <el-tag
+            v-else-if="scope.scope.tag == 3"
+            size="small"
+            type="success"
+            >tag3
+          </el-tag>
       </template>
       <template v-slot:operates="scope">
         <table-operation 
@@ -137,12 +129,13 @@ const table_title = [
     columnAlign: 'center',
     sortable:true
   },
+
 ];
 
 const operates = {
   operate: true,
   label: '操作',
-  width: '120px',
+  minwidth: '120px',
   titleAlign: 'center',
   columnAlign: 'center',
 };
@@ -152,8 +145,11 @@ const operations = [
     type: 'edit',
     title: '编辑'
   },
+  {
+    type: 'view',
+    title: '查看'
+  }
 ];
-
 
 export default {
   components: {
@@ -162,7 +158,7 @@ export default {
   },
   data() {
     return {
-      listData: [{
+      list: [{
           id: 1,
           date: '2016-05-02',
           name: '王小虎',
@@ -257,13 +253,7 @@ export default {
       table_title: table_title,
       total: 10,
       operates: operates,
-      show_pagination:true,
       operations:operations,
-      pageObj: {
-        page: 1,
-        pageSize: 2,
-        pageSizeList: [2, 4, 6],
-      },
       editDialog: false,
       editInfo: {
         id: 0,
@@ -277,47 +267,39 @@ export default {
       formLabelWidth: '100px'
     }
   },
-  computed: {
-    list() {
-      let array = []
-      this.listData.forEach((item,index) => {
-        let i = Math.floor(index / this.pageObj.pageSize)
-        if(!array[i]) {
-           array.push([])
-        }
-        array[i].push(item)
-      })
-      return array[this.pageObj.page - 1]
-    }
-  },
   methods: {
-    pageChange(page) {
-      this.pageObj.page = page
-    },
-    sizeChange(size) {
-      this.pageObj.pageSize = size
-      this.pageObj.page = 1
-    },
     handleOperation(op,row) {
-      this.editDialog = true
       console.log(op,row)
-      this.editInfo.id = row.id
-      this.editInfo.date = row.date
-      this.editInfo.name = row.name
-      this.editInfo.province = row.province
-      this.editInfo.city = row.city
-      this.editInfo.address = row.address
-      this.editInfo.tag = row.tag
+      if (op.type == 'edit') {
+        this.editDialog = true
+        this.editInfo.id = row.id
+        this.editInfo.date = row.date
+        this.editInfo.name = row.name
+        this.editInfo.province = row.province
+        this.editInfo.city = row.city
+        this.editInfo.address = row.address
+        this.editInfo.tag = row.tag
+      }
+      else if (op.type == 'view') {
+        alert ('view!!!')
+      }
     },
     closeDialog() {
       this.editDialog = false
     },
     saveDialog() {
       this.editDialog = false
-      console.log(this.editInfo)
+      let info = this.editInfo
+      this.list.forEach(item => {
+        if(item.id === info.id) {
+          for ( var key in info) {
+            item[key] = info[key];
+          }
+        }
+      })
     },
     editChange(oldV, newV, row, name) {
-      this.listData.forEach(item => {
+      this.list.forEach(item => {
         if(item.id === row.id) {
           item[name] = newV
         }

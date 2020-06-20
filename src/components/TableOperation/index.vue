@@ -26,8 +26,6 @@ export default {
     return {
       icons: {
         edit: 'el-icon-edit',
-        add: 'el-icon-plus',
-        doc: 'el-icon-document',
         view: 'el-icon-view'
       }
     };
